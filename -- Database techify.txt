@@ -1,0 +1,171 @@
+-- Database: techify
+
+-- Creating tables
+
+-- Table: category
+CREATE TABLE [category] (
+    [CategoryID] INT IDENTITY(1,1) PRIMARY KEY,
+    [CategoryName] NVARCHAR(100) NOT NULL,
+    [Description] TEXT,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: brand
+CREATE TABLE [brand] (
+    [BrandID] INT IDENTITY(1,1) PRIMARY KEY,
+    [BrandName] NVARCHAR(100) NOT NULL,
+    [Description] TEXT,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: customer
+CREATE TABLE [customer] (
+    [CustomerID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL UNIQUE,
+    [Password] NVARCHAR(255) NOT NULL,
+    [Address] NVARCHAR(255),
+    [PhoneNumber] NVARCHAR(15),
+    [DateOfBirth] DATE,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: seller
+CREATE TABLE [seller] (
+    [SellerID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL UNIQUE,
+    [Password] NVARCHAR(255) NOT NULL,
+    [Address] NVARCHAR(255),
+    [PhoneNumber] NVARCHAR(15),
+    [CompanyName] NVARCHAR(100),
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Table: product
+CREATE TABLE [product] (
+    [ProductID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Description] TEXT,
+    [Price] DECIMAL(10,2) NOT NULL,
+    [StockQuantity] INT NOT NULL,
+    [CategoryID] INT,
+    [BrandID] INT,
+    [SellerID] INT,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([CategoryID]) REFERENCES [category]([CategoryID]),
+    FOREIGN KEY ([BrandID]) REFERENCES [brand]([BrandID]),
+    FOREIGN KEY ([SellerID]) REFERENCES [seller]([SellerID])
+);
+
+-- Table: cart
+CREATE TABLE [cart] (
+    [CartID] INT IDENTITY(1,1) PRIMARY KEY,
+    [CustomerID] INT,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([CustomerID]) REFERENCES [customer]([CustomerID])
+);
+
+-- Table: review
+CREATE TABLE [review] (
+    [ReviewID] INT IDENTITY(1,1) PRIMARY KEY,
+    [CustomerID] INT,
+    [ProductID] INT,
+    [Rating] DECIMAL(2,1) NOT NULL CHECK ([Rating] BETWEEN 0 AND 5),
+    [Comment] TEXT,
+    [ReviewDate] DATETIME NOT NULL,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([CustomerID]) REFERENCES [customer]([CustomerID]),
+    FOREIGN KEY ([ProductID]) REFERENCES [product]([ProductID])
+);
+
+-- Table: [order]
+CREATE TABLE [order] (
+    [OrderID] INT IDENTITY(1,1) PRIMARY KEY,
+    [OrderDate] DATETIME NOT NULL,
+    [CustomerID] INT,
+    [TotalAmount] DECIMAL(10,2) NOT NULL,
+    [ShippingAddress] NVARCHAR(255) NOT NULL,
+    [Status] NVARCHAR(50) NOT NULL,
+    [PaymentMethod] NVARCHAR(50) NOT NULL,
+    [TrackingNumber] NVARCHAR(100),
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([CustomerID]) REFERENCES [customer]([CustomerID])
+);
+
+-- Table: orderdetail
+CREATE TABLE [orderdetail] (
+    [OrderDetailID] INT IDENTITY(1,1) PRIMARY KEY,
+    [OrderID] INT,
+    [ProductID] INT,
+    [Quantity] INT NOT NULL,
+    [UnitPrice] DECIMAL(10,2) NOT NULL,
+    [Discount] DECIMAL(10,2) DEFAULT 0.00,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([OrderID]) REFERENCES [order]([OrderID]),
+    FOREIGN KEY ([ProductID]) REFERENCES [product]([ProductID])
+);
+
+-- Table: transaction
+CREATE TABLE [transaction] (
+    [TransactionID] INT IDENTITY(1,1) PRIMARY KEY,
+    [OrderID] INT,
+    [ProductID] INT,
+    [SellerID] INT,
+    [Quantity] INT NOT NULL,
+    [UnitPrice] DECIMAL(10,2) NOT NULL,
+    [TotalAmount] DECIMAL(10,2) NOT NULL,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([OrderID]) REFERENCES [order]([OrderID]),
+    FOREIGN KEY ([ProductID]) REFERENCES [product]([ProductID]),
+    FOREIGN KEY ([SellerID]) REFERENCES [seller]([SellerID])
+);
+
+-- Table: cartitem
+CREATE TABLE [cartitem] (
+    [CartItemID] INT IDENTITY(1,1) PRIMARY KEY,
+    [CartID] INT,
+    [ProductID] INT,
+    [Quantity] INT NOT NULL,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY ([CartID]) REFERENCES [cart]([CartID]),
+    FOREIGN KEY ([ProductID]) REFERENCES [product]([ProductID])
+);
+
+-- Table: admin
+CREATE TABLE [admin] (
+    [AdminID] INT IDENTITY(1,1) PRIMARY KEY,
+    [Name] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL UNIQUE,
+    [Password] NVARCHAR(255) NOT NULL,
+    [CreatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    [UpdatedAt] DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Creating indexes
+CREATE INDEX idx_cart_customer ON [cart]([CustomerID]);
+CREATE INDEX CartID ON [cartitem]([CartID]);
+CREATE INDEX ProductID ON [cartitem]([ProductID]);
+CREATE INDEX idx_order_customer ON [order]([CustomerID]);
+CREATE INDEX OrderID ON [orderdetail]([OrderID]);
+CREATE INDEX ProductID ON [orderdetail]([ProductID]);
+CREATE INDEX idx_product_name ON [product]([Name]);
+CREATE INDEX idx_product_category ON [product]([CategoryID]);
+CREATE INDEX idx_product_brand ON [product]([BrandID]);
+CREATE INDEX idx_product_seller ON [product]([SellerID]);
+CREATE INDEX idx_review_customer ON [review]([CustomerID]);
+CREATE INDEX idx_review_product ON [review]([ProductID]);
+CREATE INDEX OrderID ON [transaction]([OrderID]);
+CREATE INDEX ProductID ON [transaction]([ProductID]);
+CREATE INDEX SellerID ON [transaction]([SellerID]);
