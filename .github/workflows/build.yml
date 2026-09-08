@@ -1,0 +1,29 @@
+---
+name: .NET Framework CI
+
+"on":
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.1.1
+
+      - name: Restore NuGet packages
+        run: nuget restore Techify.sln
+
+      - name: Build solution
+        run: msbuild Techify.sln /p:Configuration=Release
