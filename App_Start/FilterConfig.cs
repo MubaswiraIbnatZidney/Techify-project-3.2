@@ -1,0 +1,1 @@
+namespace Techify { public class FilterConfig { public static void RegisterBundles(System.Web.Optimization.BundleCollection bundles) {} public static void RegisterGlobalFilters(System.Web.Mvc.GlobalFilterCollection filters) {} public static void RegisterRoutes(System.Web.Routing.RouteCollection routes) {} } }
