@@ -1,1 +1,1 @@
-namespace Techify.Models { public class Model1.Context {} }
+namespace Techify.Models { public class Model1Context {} }

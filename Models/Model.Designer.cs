@@ -1,1 +1,1 @@
-namespace Techify.Models { public class Model.Designer {} }
+namespace Techify.Models { public class ModelDesigner {} }
